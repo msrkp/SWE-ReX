@@ -79,6 +79,11 @@ class DockerDeployment(AbstractDeployment):
     def container_name(self) -> str | None:
         return self._container_name
 
+    @property
+    def auth_token(self) -> str | None:
+        """Get the current auth token."""
+        return self._auth_token
+
     async def is_alive(self, *, timeout: float | None = None) -> IsAliveResponse:
         """Checks if the runtime is alive. The return value can be
         tested with bool().
@@ -112,6 +117,9 @@ class DockerDeployment(AbstractDeployment):
             raise e
 
     def _get_token(self) -> str:
+        """Get auth token - either use provided one or generate new."""
+        if self._config.auth_token:
+            return self._config.auth_token
         return str(uuid.uuid4())
 
     def _get_swerex_start_cmd(self, token: str) -> list[str]:
@@ -210,7 +218,7 @@ class DockerDeployment(AbstractDeployment):
             self._config.port = find_free_port()
         assert self._container_name is None
         self._container_name = self._get_container_name()
-        token = self._get_token()
+        token = self._get_token()  # Uses provided token if available
         cmds = [
             "docker",
             "run",

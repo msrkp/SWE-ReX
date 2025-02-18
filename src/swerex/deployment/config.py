@@ -31,6 +31,8 @@ class DockerDeploymentConfig(BaseModel):
     """Additional arguments to pass to the docker run command."""
     startup_timeout: float = 180.0
     """The time to wait for the runtime to start."""
+    auth_token: str | None = None
+    """The auth token to use for the docker container."""
     pull: Literal["never", "always", "missing"] = "missing"
     """When to pull docker images."""
     remove_images: bool = False
