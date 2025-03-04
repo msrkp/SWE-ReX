@@ -107,11 +107,18 @@ class DockerDeployment(AbstractDeployment):
 
     async def _wait_until_alive(self, timeout: float = 10.0):
         try:
-            return await _wait_until_alive(self.is_alive, timeout=timeout, function_timeout=self._runtime_timeout)
+            self.logger.debug("Waiting for runtime to start...")
+            result = await _wait_until_alive(self.is_alive, timeout=timeout, function_timeout=self._runtime_timeout)
+            self.logger.debug("Runtime started successfully")
+            return result
         except TimeoutError as e:
             self.logger.error("Runtime did not start within timeout. Here's the output from the container process.")
-            self.logger.error(self._container_process.stdout.read().decode())  # type: ignore
-            self.logger.error(self._container_process.stderr.read().decode())  # type: ignore
+            if self._container_process and self._container_process.stdout:
+                stdout = self._container_process.stdout.read().decode()
+                self.logger.error(f"STDOUT: {stdout}")
+            if self._container_process and self._container_process.stderr:
+                stderr = self._container_process.stderr.read().decode()
+                self.logger.error(f"STDERR: {stderr}")
             assert self._container_process is not None
             await self.stop()
             raise e
@@ -123,19 +130,14 @@ class DockerDeployment(AbstractDeployment):
         return str(uuid.uuid4())
 
     def _get_swerex_start_cmd(self, token: str) -> list[str]:
-        rex_args = f"--auth-token {token}"
-        pipx_install = "python3 -m pip install pipx && python3 -m pipx ensurepath"
         if self._config.python_standalone_dir:
-            cmd = f"{self._config.python_standalone_dir}/python3.11/bin/{REMOTE_EXECUTABLE_NAME} {rex_args}"
+            # Return arguments as separate list items
+            return ["--auth-token", token, "--host", "0.0.0.0", "--port", "8000"]
         else:
+            pipx_install = "python3 -m pip install pipx && python3 -m pipx ensurepath"
+            rex_args = f"--auth-token {token} --host 0.0.0.0 --port 8000"
             cmd = f"{REMOTE_EXECUTABLE_NAME} {rex_args} || ({pipx_install} && pipx run {PACKAGE_NAME} {rex_args})"
-        # Need to wrap with /bin/sh -c to avoid having '&&' interpreted by the parent shell
-        return [
-            "/bin/sh",
-            # "-l",
-            "-c",
-            cmd,
-        ]
+            return ["/bin/sh", "-c", cmd]
 
     def _pull_image(self) -> None:
         if self._config.pull == "never":
@@ -197,8 +199,16 @@ class DockerDeployment(AbstractDeployment):
         return text
     
     def _build_image(self):
+        # If we have a custom image and python_standalone_dir is set, use the image directly
+        if self._config.python_standalone_dir and ":" in self._config.image:
+            print("Using custom image")
+            
+            return self._config.image
+        
+        # Otherwise build using glibc_dockerfile
+        print("Building image")
         dockerfile = self.glibc_dockerfile
-        # build docker image without a tag, but get the image id
+        print(f"Dockerfile:\n{dockerfile}")
         image_id = subprocess.check_output(
             [
                 "docker", "build", "-q", "--build-arg", f"BASE_IMAGE={self._config.image}", "-",
@@ -231,18 +241,24 @@ class DockerDeployment(AbstractDeployment):
             image_id,
             *self._get_swerex_start_cmd(token),
         ]
+        print("cmds: ", cmds)
         cmd_str = shlex.join(cmds)
+        print("cmd_str: ", cmd_str)
         self.logger.info(
             f"Starting container {self._container_name} with image {self._config.image} serving on port {self._config.port}"
         )
         self.logger.debug(f"Command: {cmd_str!r}")
         # shell=True required for && etc.
+        print("subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)")
         self._container_process = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print("self._container_process: ", self._container_process)
         self._hooks.on_custom_step("Starting runtime")
         self.logger.info(f"Starting runtime at {self._config.port}")
+        print("RemoteRuntime.from_config(RemoteRuntimeConfig(port=self._config.port, timeout=self._runtime_timeout, auth_token=token))")
         self._runtime = RemoteRuntime.from_config(
             RemoteRuntimeConfig(port=self._config.port, timeout=self._runtime_timeout, auth_token=token)
         )
+        print("self._runtime: ", self._runtime)
         t0 = time.time()
         await self._wait_until_alive(timeout=self._config.startup_timeout)
         self.logger.info(f"Runtime started in {time.time() - t0:.2f}s")
