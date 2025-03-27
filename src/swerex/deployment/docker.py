@@ -182,12 +182,9 @@ class DockerDeployment(AbstractDeployment):
             "    make -j$(nproc) && \\\n"
             "    make install && \\\n"
             "    ldconfig\n\n"
-            "RUN ./configure --prefix=/root/python3.11 --enable-shared \\\n"
-            "    && make -j$(nproc) \\\n"
-            "    && make install\n\n"
             
             # Install swe-rex using the standalone Python
-            f"RUN /root/python3.11/bin/pip3 install --no-cache-dir {PACKAGE_NAME}\n\n"
+            # f"RUN /root/python3.11/bin/pip3 install --no-cache-dir {PACKAGE_NAME}\n\n"
             f"RUN /root/python3.11/bin/pip3 install --no-cache-dir requests\n\n"
 
             # Production stage
