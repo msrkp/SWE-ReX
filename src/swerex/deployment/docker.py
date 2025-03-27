@@ -179,6 +179,7 @@ class DockerDeployment(AbstractDeployment):
             
             # Install swe-rex using the standalone Python
             f"RUN /root/python3.11/bin/pip3 install --no-cache-dir {PACKAGE_NAME}\n\n"
+            f"RUN /root/python3.11/bin/pip3 install --no-cache-dir requests\n\n"
 
             # Production stage
             "FROM $BASE_IMAGE\n"
