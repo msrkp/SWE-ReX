@@ -1,5 +1,4 @@
 <div align="center">
-
 <a href="https://swe-rex.com"><img src="docs/assets/swe-rex-logo-bg.svg" alt="SWE-ReX" style="height: 10em"/></a>
 
 # SWE-agent Remote Execution Framework
@@ -34,7 +33,7 @@ Using SWE-ReX, we
 This is [SWE-agent][] using SWE-ReX to run on 30 [SWE-bench][] instances in parallel:
 
 <div align="center">
-<img src="docs/assets/swerex.gif" alt="SWE-ReX in action" width=600px>
+<img src="https://private-user-images.githubusercontent.com/13602468/416860062-2b207eb5-8593-46ec-b025-19c857c84933.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDA1MTQ3MDIsIm5iZiI6MTc0MDUxNDQwMiwicGF0aCI6Ii8xMzYwMjQ2OC80MTY4NjAwNjItMmIyMDdlYjUtODU5My00NmVjLWIwMjUtMTljODU3Yzg0OTMzLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAyMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMjI1VDIwMTMyMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTFjOGNmZDczZmM2YmQwN2EzZDQ1NjkwM2M5NDNhZmEzNzMwZTUxNDNkOTA2OGVmOGM1NTM3MWRhMDg3NTZmZDMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.iVxw9VeB7DDK1YRTUP3NbGtAlp2PQuHiJ07eS44E31s" alt="SWE-ReX in action" width=600px>
 </div>
 
 ## Get started
